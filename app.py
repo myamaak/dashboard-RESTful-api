@@ -50,8 +50,9 @@ class User(db.Model):
         self.password = password
 
 members = User.query.all()
-for m in members:
-    print("printing user", m)
+print(members)
+# for m in members:
+#     print("printing user", m)
 # parser = reqparse.RequestParser()
 # parser.add_argument(키 값)
 
