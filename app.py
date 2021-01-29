@@ -12,7 +12,7 @@ import json
 from werkzeug.security import check_password_hash
 from werkzeug.security import generate_password_hash
 from flask_jwt_extended import (
-    JWTManager, jwt_required, create_access_token, get_jwt_identity)
+    JWTManager, jwt_required, create_access_token, get_jwt_identity, decode_token)
 from datetime import timedelta, datetime
 
 db_config = {
@@ -92,31 +92,66 @@ parser.add_argument("password")
 
 @app.route("/register", methods=['GET','POST'])
 def SignUp():
-    args = parser.parse_args()
-    username = args["fullname"]
-    user_email = args["email"]
-    user_password = args["password"]
-    if username and user_email and user_password:
-        user_password = generate_password_hash(user_password)
-        check_user = User.query.filter(User.email == user_email).count()
-        print(check_user)
-        if check_user == 0:
-            new_user = User(username, user_email, user_password)
-            db.session.add(new_user)
-            db.session.commit()
-            return jsonify(status="success", result = {"name": username,"email": user_email}, message= "successfully signed in")
+    if request.method == 'POST':
+        args = parser.parse_args()
+        username = args["fullname"]
+        user_email = args["email"]
+        user_password = args["password"]
+        if username and user_email and user_password:
+            user_password = generate_password_hash(user_password)
+            check_user = User.query.filter(User.email == user_email).count()
+            print(check_user)
+            if check_user == 0:
+                new_user = User(username, user_email, user_password)
+                db.session.add(new_user)
+                db.session.commit()
+                response = {
+                    "status":"success", 
+                    "result" : {"name": username,"email": user_email}, 
+                    "message" : "successfully signed in"}
+                return jsonify(response)
+            else:
+                #user already exists
+                response = {
+                    "status" : "error", 
+                    "message" :"user already exists"
+                }
+                return jsonify(response)
         else:
-            #user already exists
-            return jsonify(status = "error", result= None, message ="user already exists")
-    else:
-        #error
-        return jsonify(status="error", result = None, message= "fill in the required information to register")
+            response = {
+                "status" : "error", 
+                "message" : "fill in the required information to register"
+            }
+            return jsonify(response)
 
 @app.route("/login", methods=['GET', 'POST'])
 def Login():
-    args = parser.parse_args()
-    user_email = args["email"]
-    user_password = args["password"]
+    if request.method == 'POST':
+        args = parser.parse_args()
+        user_email = args["email"]
+        user_password = args["password"]
+        valid_user = User.query.filter_by(email = user_email).first()
+        err_response = {
+            "status" : "error",
+            "message" : "invalid user or a wrong password"
+            }
+        if valid_user:
+            if check_password_hash(valid_user.password, user_password):
+                access_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+                access_token = create_access_token(identity = valid_user.id, expires_delta = access_expires)
+                if access_token:
+                    response = {
+                        "status" : "success",
+                        "result" : {"access_token" : decode_token(access_token)},
+                        "message" : "user is successfully logged in"
+                    }
+                    return jsonify(response)
+            else:
+                return jsonify(err_response)
+        else:
+            return jsonify(err_response)
+
+    
 # api.add_resource(user_api, '/user')
 
 @app.route('/')
