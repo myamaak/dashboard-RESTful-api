@@ -28,6 +28,7 @@ DB_URI = f"mysql+mysqlconnector://{db_config['user']}:{db_config['password']}@{d
 
 # db = SQLAlchemy()
 # migrate = Migrate()
+# migrate 없어도 되지 않나...? 써야 하는 상황과 쓰지 않아도 되는 상황을 구분하는 법 궁금...
 
 app = Flask(__name__)
 
@@ -89,7 +90,7 @@ parser.add_argument("email")
 parser.add_argument("password")
 #args["fullname"] 처럼 쓴다.
 
-@app.route("/register", methods=['POST'])
+@app.route("/register", methods=['GET','POST'])
 def SignUp():
     args = parser.parse_args()
     username = args["fullname"]
@@ -103,27 +104,19 @@ def SignUp():
             new_user = User(username, user_email, user_password)
             db.session.add(new_user)
             db.session.commit()
-            return jsonify(status="success", result = {"name": username,"email": user_email})
+            return jsonify(status="success", result = {"name": username,"email": user_email}, message= "successfully signed in")
         else:
             #user already exists
-            return jsonify(status = "redirection", result ="user already exists")
+            return jsonify(status = "error", result= None, message ="user already exists")
     else:
         #error
-        return jsonify(status="redirection", result= "fill in the required information to register")
+        return jsonify(status="error", result = None, message= "fill in the required information to register")
 
-# new = User("this", "success@plz.com" , 1111)
-# db.session.add(new)
-# db.session.commit()
-# class User(Resource):
-#     def SignUp(self): #create
-#         msg ={"message": "Hello World"}
-#         return jsonify(status="success", result=msg)
-#     def Login(self):
-#         return 
-#     def Logout(self):
-#         return
-
-
+@app.route("/login", methods=['GET', 'POST'])
+def Login():
+    args = parser.parse_args()
+    user_email = args["email"]
+    user_password = args["password"]
 # api.add_resource(user_api, '/user')
 
 @app.route('/')
