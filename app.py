@@ -123,13 +123,25 @@ def SignUp():
                 "message" : "fill in the required information to register"
             }
             return jsonify(response)
+#token을 왜 사용하는지 
+#https://lewisxyz000.tistory.com/25
+#create & refresh token 사용하기
+# https://blog.tecladocode.com/jwt-authentication-and-token-refreshing-in-rest-apis/
+#정 힘들면 session만 이용한 방법도 있음(쉬움)
+#https://fenderist.tistory.com/145?category=717421
 
+#logout - blacklist jwt
+#https://flask-jwt-extended.readthedocs.io/en/stable/blacklist_and_token_revoking/
+#블랙리스트 한국어 예시
+#https://blog.oseonsik.com/2020/11/20/flask-jwt-extended%EB%A5%BC-%ED%99%9C%EC%9A%A9%ED%95%9C-%EB%A1%9C%EA%B7%B8%EC%9D%B8-%EA%B5%AC%ED%98%84/
+# flask jwt blacklist 인증 으로 검색
 @app.route("/login", methods=['GET', 'POST'])
 def Login():
     if request.method == 'POST':
         args = parser.parse_args()
         user_email = args["email"]
         user_password = args["password"]
+        #email과 password 둘 다 입력되었는지에 대한 조건문 필요!
         valid_user = User.query.filter_by(email = user_email).first()
         err_response = {
             "status" : "error",
