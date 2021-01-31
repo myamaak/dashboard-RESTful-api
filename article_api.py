@@ -12,6 +12,8 @@ parser.add_argument("title")
 parser.add_argument("content")
 parser.add_argument("board_id")
 
+parser.add_argument("n")
+
 class Article(Resource):
     def get(self, board_id=None, board_article_id=None):
         if board_article_id:
@@ -35,6 +37,7 @@ class Article(Resource):
         args = parser.parse_args()
         author = session.get("user")
         if author :
+            print(args)
             new_article = BoardArticle(args["title"], args["content"], board_id,author)
             db.session.add(new_article)
             db.session.commit()
@@ -105,8 +108,8 @@ class Article(Resource):
             }
             return jsonify(response)
 
-parser = reqparse.RequestParser()
-parser.add_argument("n")
+# parser = reqparse.RequestParser()
+# parser.add_argument("n")
 
 class DashBoard(Resource):
     def get(self):
@@ -118,7 +121,7 @@ class DashBoard(Resource):
             board_id = b.id
             articles = BoardArticle.query.filter_by(board_id = board_id).order_by(BoardArticle.create_date.desc()).limit(num)
             # .order_by(BoardArticle.create_date.desc()).limit(num)
-            result.extend([a.to_dict() for a in articles])
+            result.extend([a.title for a in articles])
             # print("id", board_id,"article", len([a.to_dict() for a in articles]))
             response={
                 "status":"success",
