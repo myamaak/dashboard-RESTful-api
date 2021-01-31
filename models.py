@@ -1,6 +1,9 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import func
 from sqlalchemy import ForeignKey
+
+from sqlalchemy_serializer import SerializerMixin
+
 db = SQLAlchemy()
 # from app import db
 
@@ -20,7 +23,7 @@ class User(db.Model):
         self.password = password
 
 
-class Board(db.Model):
+class Board(db.Model, SerializerMixin):
     __tablename__ = 'board'
     id = db.Column(db.Integer, primary_key=True)
     boardname = db.Column(db.String(64), nullable=False)
@@ -32,7 +35,7 @@ class Board(db.Model):
         self.boardname = boardname
         self.user_id = user_id
 
-class BoardArticle(db.Model):
+class BoardArticle(db.Model, SerializerMixin):
     __tablename__ = 'boardArticle'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(64), nullable=False)

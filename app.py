@@ -13,10 +13,15 @@ from werkzeug.security import generate_password_hash
 # from datetime import timedelta, datetime
 
 from user_api import SignUp, Login, Logout
+from board_api import board
+from article_api import Article, DashBoard
+
+# from dashboard_api import dashboard
 
 # db = SQLAlchemy()
 # migrate = Migrate()
 # migrate 없어도 되지 않나...? 써야 하는 상황과 쓰지 않아도 되는 상황을 구분하는 법 궁금...
+# db의 형태를 수정해야 할때만 필요..?(맞나?)
 
 app = Flask(__name__)
 
@@ -37,6 +42,10 @@ api.add_resource(SignUp, '/register')
 api.add_resource(Login, '/login')
 api.add_resource(Logout, '/logout')
 
+api.add_resource(board, '/board')
+
+api.add_resource(Article, '/board/<board_id>', '/board/<board_id>/<board_article_id>')
+
+api.add_resource(DashBoard, '/dashboard')
 if __name__ == "__main__":
-    # app.init_db()
     app.run(debug = True)
