@@ -16,7 +16,7 @@ from user_api import SignUp, Login, Logout
 
 from board_api import board
 
-# from article_api import article
+from article_api import Article, DashBoard
 
 # from dashboard_api import dashboard
 
@@ -46,5 +46,8 @@ api.add_resource(Logout, '/logout')
 
 api.add_resource(board, '/board')
 
+api.add_resource(Article, '/board/<board_id>', '/board/<board_id>/<board_article_id>')
+
+api.add_resource(DashBoard, '/dashboard')
 if __name__ == "__main__":
     app.run(debug = True)

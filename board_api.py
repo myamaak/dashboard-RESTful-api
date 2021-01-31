@@ -14,10 +14,9 @@ parser.add_argument("name")
 class board(Resource):
     def get(self):
         boardlist = Board.query.all()
-        print(boardlist)
         #https://stackoverflow.com/questions/7102754/jsonify-a-sqlalchemy-result-set-in-flask
         #결과를 jsonify 할 수 있게 만들어야됨
-        result = [{"name": b.boardname, "create_date": b.create_date, "manager": b.user_id} for b in boardlist]
+        result = [b.to_dict() for b in boardlist]
         response = {
             "status": "success",
             "result": result,
