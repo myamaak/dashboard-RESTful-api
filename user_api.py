@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request, session
 from flask_restful import reqparse, abort, Api, Resource
 
 from config import config
-from models import db, User, Board, BoardArticle
+from models import db, User
 
 import json
 
