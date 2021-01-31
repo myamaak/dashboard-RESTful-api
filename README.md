@@ -15,15 +15,11 @@ python app.py
 
 **users** 테이블에 존재하는 데이터
 
-|fullname|email|password|id|
-
-|——|——|——|——|
-
-|elice|racer@google.com|234234|1|
-
-|dodo|bird@naver.com|1111|2|
-
-|hatter|mad@elice.co.kr|0000|3|
+| fullname | email            | password | id |
+|:--------:|------------------|----------|----|
+| elice    | racer@google.com | 234234   | 1  |
+| dodo     | bird@naver.com   | 1111     | 2  |
+| hatter   | mad@elice.co.kr  | 0000     | 3  |
 
 ### SignUp API
 
@@ -129,15 +125,11 @@ email이 데이터베이스에 존재하지 않거나 password가 유저의 이�
 
 # Board APIs
 
-|id|boardname|create_date|user_id|
-
-|——|——|——|——|
-
-|1|cat|2021-02-01 00:07:56|1|
-
-|2|bird||2|
-
-|3|dog||3|
+| id | boardname | create_date         | user_id |
+|----|-----------|---------------------|---------|
+| 1  | cat       | 2021-02-01 00:07:56 | 1       |
+| 2  | bird      | 2021-02-01 00:36:39 | 2       |
+| 3  | dog       | 2021-02-01 00:40:04 | 3       |
 
 ### Read API
 
