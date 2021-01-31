@@ -1,8 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import func
 from sqlalchemy import ForeignKey
-# db = SQLAlchemy()
-from app import db
+db = SQLAlchemy()
+# from app import db
 
 # db = SQLAlchemy(app)
 # db.create_all()

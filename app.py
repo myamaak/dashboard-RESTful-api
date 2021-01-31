@@ -123,6 +123,10 @@ def SignUp():
                 "message" : "fill in the required information to register"
             }
             return jsonify(response)
+#이거 보고 따라하기!!!!!!config, models 분리
+#https://oluchiorji.com/flask-app-authentication-with-jwt/
+
+            
 #token을 왜 사용하는지 
 #https://lewisxyz000.tistory.com/25
 #create & refresh token 사용하기
@@ -163,11 +167,17 @@ def Login():
         else:
             return jsonify(err_response)
 
+@app.route('/logout', methods=["DELETE"])
+def Logout():
+    args = parser.parse_args()
+    current_user = args["user_id"]
+    current_user = get_raw_jwt()[current_user]
     
 # api.add_resource(user_api, '/user')
 
 @app.route('/')
 def home():
+    
     members = User.query.all()
     for i in members:
         print(i.username)
