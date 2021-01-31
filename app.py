@@ -1,13 +1,10 @@
 from flask import Flask, jsonify, request, session
 from flask_restful import reqparse, abort, Api, Resource
 
-from flask_migrate import Migrate
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.sql import func
-from sqlalchemy import ForeignKey
+from config import config
+from models import db, User, Board, BoardArticle
 
 import json
-# import config
 
 from werkzeug.security import check_password_hash
 from werkzeug.security import generate_password_hash
@@ -15,16 +12,6 @@ from flask_jwt_extended import (
     JWTManager, jwt_required, create_access_token, get_jwt_identity, decode_token)
 from datetime import timedelta, datetime
 
-db_config = {
-    'user'     : 'newuser',
-    'password' : '0000',
-    'host'     : '127.0.0.1',
-    'port'     : '3306',
-    'database' : 'rest_api'
-}
-
-DB_URI = f"mysql+mysqlconnector://{db_config['user']}:{db_config['password']}@{db_config['host']}:{db_config['port']}/{db_config['database']}?charset=utf8" 
-#https://velog.io/@inyong_pang/Flask-API-MySQL-%EC%97%B0%EB%8F%99-SQLAlchemy
 
 # db = SQLAlchemy()
 # migrate = Migrate()
@@ -32,57 +19,13 @@ DB_URI = f"mysql+mysqlconnector://{db_config['user']}:{db_config['password']}@{d
 
 app = Flask(__name__)
 
-app.config['SECRET_KEY'] = 'dev'
+app.config.from_object(config)
+db.init_app(app)
+
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 #change later
 jwt = JWTManager(app)
 
 api = Api(app)
-
-#db settings start
-app.config['SQLALCHEMY_DATABASE_URI'] = DB_URI
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
-db.create_all()
-
-class User(db.Model):
-    __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), nullable=False)
-    email = db.Column(db.String(64), nullable=False)
-    password = db.Column(db.Text, nullable=False)
-
-    def __init__(self, username, email, password):
-        self.username = username
-        self.email = email
-        self.password = password
-
-class Board(db.Model):
-    __tablename__ = 'board'
-    id = db.Column(db.Integer, primary_key=True)
-    boardname = db.Column(db.String(64), nullable=False)
-    create_date = db.Column(db.DateTime(timezone=True), default= func.now())
-    #https://stackoverflow.com/questions/13370317/sqlalchemy-default-datetime -> timestamp sqlalchemy
-    user_id = db.Column(db.Integer, ForeignKey('users.id'))
-
-    def __init__(self, boardname, user_id):
-        self.boardname = boardname
-        self.user_id = user_id
-
-class BoardArticle(db.Model):
-    __tablename__ = 'boardArticle'
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(64), nullable=False)
-    content = db.Column(db.Text, nullable=False)
-    board_id = db.Column(db.Integer, ForeignKey('board.id'))
-    user_id = db.Column(db.Integer, ForeignKey('users.id'))
-    create_date = db.Column(db.DateTime(timezone=True), default= func.now())
-
-    def __init__(self, title, content, board_id, user_id):
-        self.title = title
-        self.content = content
-        self.board_id = board_id
-        self.user_id = user_id
-#db settings end
 
 parser = reqparse.RequestParser()
 parser.add_argument("fullname")
@@ -90,9 +33,10 @@ parser.add_argument("email")
 parser.add_argument("password")
 #args["fullname"] 처럼 쓴다.
 
-@app.route("/register", methods=['GET','POST'])
-def SignUp():
-    if request.method == 'POST':
+# @app.route("/register", methods=['GET','POST'])
+# def SignUp():
+class SignUp(Resource):
+    def post(self):
         args = parser.parse_args()
         username = args["fullname"]
         user_email = args["email"]
@@ -123,10 +67,11 @@ def SignUp():
                 "message" : "fill in the required information to register"
             }
             return jsonify(response)
+
 #이거 보고 따라하기!!!!!!config, models 분리
 #https://oluchiorji.com/flask-app-authentication-with-jwt/
 
-            
+          
 #token을 왜 사용하는지 
 #https://lewisxyz000.tistory.com/25
 #create & refresh token 사용하기
@@ -139,9 +84,9 @@ def SignUp():
 #블랙리스트 한국어 예시
 #https://blog.oseonsik.com/2020/11/20/flask-jwt-extended%EB%A5%BC-%ED%99%9C%EC%9A%A9%ED%95%9C-%EB%A1%9C%EA%B7%B8%EC%9D%B8-%EA%B5%AC%ED%98%84/
 # flask jwt blacklist 인증 으로 검색
-@app.route("/login", methods=['GET', 'POST'])
-def Login():
-    if request.method == 'POST':
+# @app.route("/login", methods=['GET', 'POST'])
+class Login(Resource):
+    def post(self):
         args = parser.parse_args()
         user_email = args["email"]
         user_password = args["password"]
@@ -155,33 +100,44 @@ def Login():
             if check_password_hash(valid_user.password, user_password):
                 access_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
                 access_token = create_access_token(identity = valid_user.id, expires_delta = access_expires)
-                if access_token:
-                    response = {
-                        "status" : "success",
-                        "result" : {"access_token" : decode_token(access_token)},
-                        "message" : "user is successfully logged in"
-                    }
-                    return jsonify(response)
+                # session.clear() #pop과 차이가 뭐지? 왜 로그인하는데 session을 clear하지?
+                #session이 비어있지 않은 상황이면 다른 유저가 로그인 되어있다는거 아닌가???? 그걸 clear해도 되나?
+                session['user'] = valid_user.id
+                response = {
+                    "status" : "success",
+                    "result" : valid_user.id,
+                    "message" : "user is successfully logged in"
+                }
+                return jsonify(response)
             else:
                 return jsonify(err_response)
         else:
             return jsonify(err_response)
 
-@app.route('/logout', methods=["DELETE"])
-def Logout():
-    args = parser.parse_args()
-    current_user = args["user_id"]
-    current_user = get_raw_jwt()[current_user]
+
+class Logout(Resource):
+    def delete(self):
+        if 'user' in session:
+            session.pop('user', None)
+            response = {
+                "status": "success",
+                "message": "user is successfully logged out"
+            }
+            return jsonify(response)
     
 # api.add_resource(user_api, '/user')
 
-@app.route('/')
-def home():
+# @app.route('/')
+# def home():
     
-    members = User.query.all()
-    for i in members:
-        print(i.username)
-    return "hello"
+#     members = User.query.all()
+#     for i in members:
+#         print(i.username)
+#     return "hello"
+
+api.add_resource(SignUp, '/register')
+api.add_resource(Login, '/login')
+api.add_resource(Logout, '/logout')
 
 if __name__ == "__main__":
     # app.init_db()
