@@ -294,7 +294,63 @@ email이 데이터베이스에 존재하지 않거나 password가 유저의 이�
 ---
 
 # BoardArticle APIs
+현재 게시글 데이터는 다음과 같이 존재한다.
 
+```json
+{
+    "result": [
+        {
+            "board_id": 1,
+            "content": "miaow meow miaow",
+            "create_date": "2021-02-01 01:26:44",
+            "id": 4,
+            "title": "meow",
+            "user_id": 3
+        },
+        {
+            "board_id": 1,
+            "content": "rule the earth",
+            "create_date": "2021-02-01 01:25:21",
+            "id": 3,
+            "title": "cats should",
+            "user_id": 3
+        },
+        {
+            "board_id": 2,
+            "content": "is a bird",
+            "create_date": "2021-02-01 01:27:53",
+            "id": 6,
+            "title": "dodo",
+            "user_id": 3
+        },
+        {
+            "board_id": 2,
+            "content": "is not a bird",
+            "create_date": "2021-02-01 01:27:17",
+            "id": 5,
+            "title": "racoon",
+            "user_id": 3
+        },
+        {
+            "board_id": 3,
+            "content": "is also very cute",
+            "create_date": "2021-02-01 01:20:25",
+            "id": 2,
+            "title": "welsh corgi",
+            "user_id": 3
+        },
+        {
+            "board_id": 3,
+            "content": "is really cute...",
+            "create_date": "2021-02-01 01:08:58",
+            "id": 1,
+            "title": "sigore jobujong",
+            "user_id": 3
+        }
+    ],
+    "status": "success"
+}
+```
 ### Read API
 
 서버를 실행한 후 [http://127.0.0.1:5000/](http://127.0.0.1:5000/board)board/<board_id> 에서 GET 요청을 보내면 해당하는 board_id의 모든 게시글이 반환된다.
