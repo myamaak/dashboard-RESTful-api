@@ -86,6 +86,8 @@ python app.py
 
     ```json
     {
+        "email":"bird@naver.com",
+        "password":1111
     }
     ```
 
